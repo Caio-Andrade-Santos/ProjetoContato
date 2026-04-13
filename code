@@ -129,6 +129,7 @@ class Contato {
 			telefone.insert(9,"-");
 			this->telefone = telefone;
 			}
+
 		void setDtNasc(Data dtNasc) { this->dtNasc = dtNasc; }
 
 		int getIdade(){
@@ -140,6 +141,7 @@ class Contato {
 			{
 				idade--;
 			}
+
 			return idade;
 		}
 };
