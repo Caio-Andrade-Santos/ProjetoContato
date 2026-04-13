@@ -1,0 +1,202 @@
+#include <iostream>
+#include <locale.h>
+#include <string>
+#include <ctime>
+using namespace std;
+
+class Data 
+{
+	private:
+	   int dia;
+   	   int mes;
+	   int ano;
+     public:
+     	Data(int dia, int mes, int ano)
+     	{
+		 	this->dia = dia;
+		 	this->mes = mes;
+		 	this->ano = ano;
+        }
+        Data()
+        {
+			this->dia = 0;
+			this->mes = 0;
+			this->ano = 0;
+		}
+		void setDia(int dia)
+		{
+			this->dia = dia;
+		}
+		void setMes(int mes)
+		{
+			this->mes = mes;
+		}
+		void setAno(int ano)
+		{
+			this->ano = ano;			
+		}
+		int getDia()
+		{
+			return this->dia;
+		}
+		int getMes()
+		{
+			return this->mes;
+		}
+		int getAno()
+		{
+			return this->ano;
+		}
+		string getData()
+		{
+			string sdia = to_string(this->dia);
+            string smes = to_string(this->mes);
+            string sano = to_string(this->ano);
+        	return sdia.insert(0, 2-sdia.size(), '0') + "/" + 
+	               smes.insert(0, 2-smes.size(), '0') + "/" + 
+		           sano;
+		}
+		Data* dia_seguinte()
+		{
+			int ultimoDiaDoMes[12] = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
+		    Data *d1 = new Data(this->dia, this->mes, this->ano);
+		   	
+		   	if (d1->ano%4 == 0)
+			   	ultimoDiaDoMes[1]++; 
+		   
+		   d1->dia++;
+		   if (d1->dia > ultimoDiaDoMes[d1->mes-1])
+		   {
+		   	d1->dia = 1;
+		   	d1->mes++;
+		   	if (d1->mes>12)
+			   {
+			   	d1->mes = 1;
+			   	d1->ano++;
+			   }
+		   }	
+		   return d1;
+	}
+	static Data pegarDataAtual() 
+	{
+    time_t t = time(0);
+    tm* agora = localtime(&t);
+
+    return Data(
+        agora->tm_mday,
+        agora->tm_mon + 1,
+        agora->tm_year + 1900
+    );
+}
+};
+
+class Contato {
+	private:
+		string email;
+		string nome;
+		string telefone;
+		Data dtNasc;
+
+	public:
+		Contato(string email, string nome, string telefone, Data dtNasc) {
+			this->email = email;
+			this->nome = nome;
+			setTelefone(telefone);
+			this->dtNasc = dtNasc;
+		}
+
+		Contato() {
+			this->email = "";
+			this->nome = "";
+			this->telefone = "";
+			this->dtNasc = Data();
+		}
+
+		string getEmail() { return email; }
+		string getNome() { return nome; }
+		string getTelefone() { return telefone; }
+		Data getDtNasc() { return dtNasc; }
+
+		void setEmail(string email) { this->email = email; }
+		void setNome(string nome) { this->nome = nome; }
+		void setTelefone(string telefone) { 
+				while(telefone.length() != 11){
+				cout << "digite um valor de numero real";
+				cin >> telefone;
+			}
+			telefone.insert(0,"(");
+			telefone.insert(3,")");
+			telefone.insert(9,"-");
+			this->telefone = telefone;
+			}
+		void setDtNasc(Data dtNasc) { this->dtNasc = dtNasc; }
+
+		int getIdade(){
+			Data hoje = Data::pegarDataAtual();
+			int idade = hoje.getAno() - dtNasc.getAno();
+
+			if (hoje.getMes() < dtNasc.getMes() || 
+			   (hoje.getMes() == dtNasc.getMes() && hoje.getDia() < dtNasc.getDia()))
+			{
+				idade--;
+			}
+			return idade;
+		}
+};
+
+int main()
+{
+	setlocale(LC_ALL, "");
+
+	Contato contatos[5];
+
+	for(int i = 0; i < 5; i++)
+	{
+		string nome, email, telefone;
+		int dia, mes, ano;
+		Data hoje = Data::pegarDataAtual();
+
+		cout << "\nContato " << i+1 << endl;
+
+		cout << "Nome: ";
+		cin >> nome;
+
+		cout << "Email: ";
+		cin >> email;
+
+		cout << "Telefone: ";
+		cin >> telefone;
+		
+		do{
+		cout << "Dia nascimento: ";
+		cin >> dia;
+		
+		cout << "Mes nascimento: ";
+		cin >> mes;
+
+		cout << "Ano nascimento: ";
+		cin >> ano;
+		}while(dia > 31 || mes > 12 || ano > hoje.getAno() ||
+       (ano == hoje.getAno() && mes > hoje.getMes()) ||
+       (ano == hoje.getAno() && mes == hoje.getMes() && dia > hoje.getDia()));
+		
+		Data d(dia, mes, ano);
+
+		contatos[i].setNome(nome);
+		contatos[i].setEmail(email);
+		contatos[i].setTelefone(telefone);
+		contatos[i].setDtNasc(d);
+	}
+
+	cout << "\n=== CONTATOS CADASTRADOS ===\n";
+
+	for(int i = 0; i < 5; i++)
+	{
+		cout << "\nNome: " << contatos[i].getNome();
+		cout << "\nEmail: " << contatos[i].getEmail();
+		cout << "\nTelefone: " << contatos[i].getTelefone();
+		cout << "\nIdade: " << contatos[i].getIdade() << endl;
+	}
+
+	return 0;
+}
